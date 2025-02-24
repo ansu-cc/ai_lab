@@ -18,5 +18,5 @@ require-dbt-version: [">=1.0.0", "<2.0.0"]
 models:
   ai_lab:
     transformations:
-      schema: public
-      materialized: ephemeral
+      schema: webshop
+      materialized: order
