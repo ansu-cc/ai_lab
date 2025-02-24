@@ -1,4 +1,4 @@
-jaffle_shop:
+ai_lab:
   target: dev
   outputs:
     dev:
@@ -8,6 +8,5 @@ jaffle_shop:
       password: "{{env_var('AIRFLOW_POSTGRES_PASSWORD')}}"
       port: 5432
       dbname: webshop
-      schema: order
+      schema: webshop
       threads: 6
-  

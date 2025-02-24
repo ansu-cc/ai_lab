@@ -19,4 +19,4 @@ models:
   ai_lab:
     transformations:
       schema: webshop
-      materialized: order
+      materialized: table  
