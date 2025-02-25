@@ -1,14 +1,20 @@
 {{ config(
     materialized='incremental',
-    unique_key='order_id'
+    unique_key='id'
 ) }}
 
 SELECT
-    order_id,
-    orderTimestamp + (CURRENT_DATE - MAX(orderTimestamp) OVER()) AS orderTimestamp
+    id,
+    customerid,
+    ordertimestamp + (CURRENT_DATE - MAX(ordertimestamp) OVER()) AS ordertimestamp,
+    shippingaddressid,
+    total,
+    shippingcost,
+    created,
+    updated
 FROM webshop.order
 
 {% if is_incremental() %}
-WHERE orderTimestamp > (SELECT MAX(orderTimestamp) FROM {{ this }})
+WHERE ordertimestamp > (SELECT MAX(ordertimestamp) FROM {{ this }})
 {% endif %}
 
