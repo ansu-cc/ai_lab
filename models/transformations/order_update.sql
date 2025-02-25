@@ -3,22 +3,19 @@
     unique_key='id',
     pre_hook="
         CREATE SCHEMA IF NOT EXISTS webshoporg;
-        CREATE TABLE IF NOT EXISTS webshoporg.order AS SELECT * FROM webshop.order;
+        CREATE TABLE IF NOT EXISTS webshoporg.order AS SELECT * FROM webshop.order LIMIT 0;
     "
 ) }}
 
 WITH date_shift AS (
-    SELECT CURRENT_DATE - MAX(orderTimestamp) AS shift_days
+    SELECT CURRENT_DATE - MAX(ordertimestamp) AS shift_days
     FROM webshop.order
 )
-
-UPDATE webshop.order
-SET orderTimestamp = orderTimestamp + (SELECT shift_days FROM date_shift);
 
 SELECT
     id,
     customerid,
-    ordertimestamp,
+    ordertimestamp + (SELECT shift_days FROM date_shift) AS ordertimestamp,
     shippingaddressid,
     total,
     shippingcost,
