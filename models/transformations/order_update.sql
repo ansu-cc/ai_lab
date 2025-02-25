@@ -29,5 +29,3 @@ FROM webshop.order
 {% if is_incremental() %}
 WHERE ordertimestamp > (SELECT MAX(ordertimestamp) FROM {{ this }})
 {% endif %}
-
-
