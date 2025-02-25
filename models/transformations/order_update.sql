@@ -2,15 +2,18 @@
     materialized='incremental',
     unique_key='id',
     pre_hook="
-        CREATE TABLE IF NOT EXISTS WebShopORG.order AS SELECT * FROM webshop.order;
-        DROP TABLE IF EXISTS webshop.order;
-        CREATE TABLE webshop.order AS SELECT * FROM WebShopORG.order;
-    ",
-    post_hook="
-        UPDATE webshop.order
-        SET orderTimestamp = orderTimestamp + (SELECT CURRENT_DATE - MAX(orderTimestamp) FROM webshop.order);
+        CREATE SCHEMA IF NOT EXISTS webshoporg;
+        CREATE TABLE IF NOT EXISTS webshoporg.order AS SELECT * FROM webshop.order;
     "
 ) }}
+
+WITH date_shift AS (
+    SELECT CURRENT_DATE - MAX(orderTimestamp) AS shift_days
+    FROM webshop.order
+)
+
+UPDATE webshop.order
+SET orderTimestamp = orderTimestamp + (SELECT shift_days FROM date_shift);
 
 SELECT
     id,
@@ -26,4 +29,5 @@ FROM webshop.order
 {% if is_incremental() %}
 WHERE ordertimestamp > (SELECT MAX(ordertimestamp) FROM {{ this }})
 {% endif %}
+
 
