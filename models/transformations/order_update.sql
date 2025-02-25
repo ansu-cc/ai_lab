@@ -3,15 +3,30 @@
     unique_key='id'
 ) }}
 
-WITH latest_date AS (
-    -- Get the latest ordertimestamp from the existing table
-    SELECT MAX(ordertimestamp) AS last_order_date FROM {{ this }}
+-- Step 1: Backup today's orders into WebShopORG if not already backed up
+CREATE TABLE IF NOT EXISTS WebShopORG.order AS
+SELECT * FROM webshop.order;
+
+-- Step 2: Drop and Restore WebShop.order from WebShopORG
+DROP TABLE IF EXISTS webshop.order;
+CREATE TABLE webshop.order AS
+SELECT * FROM WebShopORG.order;
+
+-- Step 3: Compute the date shift
+WITH date_shift AS (
+    SELECT CURRENT_DATE - MAX(orderTimestamp) AS shift_days
+    FROM webshop.order
 )
 
+-- Step 4: Apply the date shift to all orders
+UPDATE webshop.order
+SET orderTimestamp = orderTimestamp + (SELECT shift_days FROM date_shift);
+
+-- Step 5: Ensure only new records are added incrementally
 SELECT
     id,
     customerid,
-    ordertimestamp + (SELECT CURRENT_DATE - last_order_date FROM latest_date) AS ordertimestamp,
+    ordertimestamp,
     shippingaddressid,
     total,
     shippingcost,
